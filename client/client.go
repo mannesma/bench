@@ -1,4 +1,4 @@
-package bench
+package client
 
 type Client interface {
    Get(key string) ([]byte, error)
