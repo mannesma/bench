@@ -15,6 +15,7 @@ func MakeClient(client_type string, server_host string) Client {
       return MakeConsulClient(server_host)
       break
    case "etcd":
+      return MakeEtcdClient(server_host)
       // if server_host == "" {
       //   server_host = "localhost:2379"
       // }

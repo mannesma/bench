@@ -10,32 +10,6 @@ import (
 
 import "launchpad.net/gozk/zookeeper"
 
-func MakeTestHttpClient(config *bench.Config) *TestHttpClient {
-   var server_host string = ""
-
-   client := &TestHttpClient {}
-   if config.ServerHost != "" {
-      server_host = config.ServerHost
-   }
-   switch config.ServerType {
-   case "consul":
-      if server_host == "" {
-         server_host = "localhost:8500"
-      }
-      client.base_url = fmt.Sprintf("http://%s/v1/kv", server_host)
-      break
-   case "etcd":
-      if server_host == "" {
-         server_host = "localhost:2379"
-      }
-      client.base_url = fmt.Sprintf("http://%s/v2/keys", server_host)
-      break
-   }
-   client.client = &http.Client{}
-
-   return client
-}
-
 type TestZookeeperClient struct {
    server_host string
    client *zookeeper.Conn
