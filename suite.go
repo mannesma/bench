@@ -12,38 +12,29 @@ type Suite struct {
    Config *Config
    Client client.Client
    RandGen *rand.Rand
-   TestFunc func() error
-   SetupTest func() error
+   Benchmark func() error
+   Setup func() error
    ReadPerf *perf.Event
 }
 
 func MakeSuite (config *Config) *Suite {
    s := &Suite {
       Config: config,
+      Client: client.MakeClient(config.ClientType, config.ServerHost),
       RandGen: rand.New(rand.NewSource(config.Seed)),
       ReadPerf: perf.MakeEvent("Get"),
    }
 
-   if config.ServerType == "consul" || config.ServerType == "etcd" {
-      s.Client = MakeTestHttpClient(config)
-   } else {  // "zookeeper"
-      client, err := MakeTestZookeeperClient(config)
-      if err != nil {
-         return nil
-      }
-      s.Client = client
-   }
-
-   if s.Config.TestType == "read" {
+   if s.Config.BenchType == "read" {
       fmt.Printf("Info: read test\n")
-      s.TestFunc = s.read_test
-      s.SetupTest = s.read_setup
+      s.Benchmark = s.bench_read
+      s.Setup = s.setup_read
    }
 
    return s
 }
 
-func (s *Suite) read_setup() error {
+func (s *Suite) setup_read() error {
    for _, k1 := range KeyNames {
       key := fmt.Sprintf("/%s", k1)
       err := s.Client.Set(key, []byte(fmt.Sprintf("%d", s.RandGen.Intn(1024))))
@@ -62,7 +53,7 @@ func (s *Suite) read_setup() error {
    return nil
 }
 
-func (s *Suite) read_test() error {
+func (s *Suite) bench_read() error {
    key1 := KeyNames[s.RandGen.Intn(len(KeyNames))]
    key2 := KeyNames[s.RandGen.Intn(len(KeyNames))]
    key := fmt.Sprintf("/%s/%s", key1, key2)
@@ -77,14 +68,14 @@ func (s *Suite) read_test() error {
    }
 }
 
-func (s *Suite) run_test() {
+func (s *Suite) Run() {
    var i int64
    var sleepval time.Duration
 
    for i = 0; i < s.Config.Iterations; i++ {
       sleepval = s.calc_sleep_time()
       time.Sleep(sleepval)
-      s.TestFunc()
+      s.Benchmark()
    }
 }
 

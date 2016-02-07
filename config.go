@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-   ServerType string
+   ClientType string
    ServerHost string
-   TestType string
+   BenchType string
    Setup bool
    Iterations int64
    ArrivalRate float64
@@ -20,8 +20,8 @@ type Config struct {
 
 func MakeConfigFromCmdline() *Config {
    tc := &Config {}
-   flag.StringVar(&tc.ServerType, "server_type", "consul", "Type of server to connect to")   
-   flag.StringVar(&tc.TestType, "test_type", "read", "Type of test to run")
+   flag.StringVar(&tc.ClientType, "client_type", "consul", "Type of client to connect with")   
+   flag.StringVar(&tc.BenchType, "bench_type", "read", "Type of test to run")
    flag.BoolVar(&tc.Setup, "setup", false, "Initialize the servers for test type")
    flag.Int64Var(&tc.Iterations, "iterations", 10, "Number of times to read")
    flag.Float64Var(&tc.ArrivalRate, "arrival_rate", 2, "Number of operations per second")
@@ -31,15 +31,15 @@ func MakeConfigFromCmdline() *Config {
 
    flag.Parse()
 
-   if tc.ServerType != "consul" && 
-      tc.ServerType != "etcd" && 
-      tc.ServerType != "zookeeper" {
-      fmt.Printf("Error: invalid server_type '%s'\n", tc.ServerType)
+   if tc.ClientType != "consul" && 
+      tc.ClientType != "etcd" && 
+      tc.ClientType != "zookeeper" {
+      fmt.Printf("Error: invalid client_type '%s'\n", tc.ClientType)
    }
-   fmt.Printf("server_type = %s\n", tc.ServerType)
+   fmt.Printf("server_type = %s\n", tc.ClientType)
    fmt.Printf("server_host = %s\n", tc.ServerHost)
    fmt.Printf("setup = %t\n", tc.Setup)
-   fmt.Printf("test_type = %s\n", tc.TestType)
+   fmt.Printf("bench_type = %s\n", tc.BenchType)
    fmt.Printf("iterations = %d\n", tc.Iterations)
    fmt.Printf("arrival_rate = %f\n", tc.ArrivalRate)
    fmt.Printf("seed = %d\n", tc.Seed)
