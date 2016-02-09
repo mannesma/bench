@@ -71,3 +71,7 @@ func (z *ZookeeperClient) Set(key string, value []byte) error {
 
    return nil
 }
+
+func (z *ZookeeperClient) CreateDir(key string) error {
+   return z.Set(key, []byte(""))
+}

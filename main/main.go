@@ -8,20 +8,23 @@ import (
 
 func main() {
    config := bench.MakeConfigFromCmdline()
-   t := bench.MakeSuite(config)   
+   s := bench.MakeSuite(config)   
 
-   if t == nil {
+   if s == nil {
       fmt.Printf("Error creating Suite!\n")
       os.Exit(1)
    }
 
-   if t.Config.Setup {
-      err := t.Setup()
+   if s.Config.Setup {
+      err := s.Setup()
       if err != nil {
          fmt.Printf("Error with setup: %s\n", err)
       }
    } else {
-      t.Run()
-      t.ReadPerf.Print(true)
+      s.Run()
+      for k, v := range s.PerfList {
+         fmt.Printf("bench = %s\n", k)
+         v.Print(true)
+      }
    }
 }

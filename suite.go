@@ -14,58 +14,27 @@ type Suite struct {
    RandGen *rand.Rand
    Benchmark func() error
    Setup func() error
-   ReadPerf *perf.Event
+   PerfList map[string]*perf.Event
 }
 
 func MakeSuite (config *Config) *Suite {
    s := &Suite {
       Config: config,
-      Client: client.MakeClient(config.ClientType, config.ServerHost),
+      Client: client.MakeClient(config.ClientType,
+                                config.ServerHost,
+                                config.Debug),
       RandGen: rand.New(rand.NewSource(config.Seed)),
-      ReadPerf: perf.MakeEvent("Get"),
+      PerfList: make(map[string]*perf.Event),
    }
 
    if s.Config.BenchType == "read" {
       fmt.Printf("Info: read test\n")
       s.Benchmark = s.bench_read
       s.Setup = s.setup_read
+      s.PerfList["Read"] = perf.MakeEvent("Read")
    }
 
    return s
-}
-
-func (s *Suite) setup_read() error {
-   for _, k1 := range KeyNames {
-      key := fmt.Sprintf("/%s", k1)
-      err := s.Client.Set(key, []byte(fmt.Sprintf("%d", s.RandGen.Intn(1024))))
-      if err != nil {
-         return err
-      }
-      for _, k2 := range KeyNames {
-         key := fmt.Sprintf("/%s/%s", k1, k2)
-         err := s.Client.Set(key, []byte(fmt.Sprintf("%d", s.RandGen.Intn(1024))))
-         if err != nil {
-            return err
-         }
-      }
-   }
-
-   return nil
-}
-
-func (s *Suite) bench_read() error {
-   key1 := KeyNames[s.RandGen.Intn(len(KeyNames))]
-   key2 := KeyNames[s.RandGen.Intn(len(KeyNames))]
-   key := fmt.Sprintf("/%s/%s", key1, key2)
-   s.ReadPerf.Start()
-   value, err := s.Client.Get(key)
-   s.ReadPerf.Stop()
-   if err == nil {
-      if s.Config.Debug { fmt.Printf("value = %s\n", value) }
-      return nil
-   } else {
-      return err
-   }
 }
 
 func (s *Suite) Run() {

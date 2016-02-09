@@ -27,3 +27,7 @@ func (c *ConsulClient) Get(key string) ([]byte, error) {
 func (c *ConsulClient) Set(key string, value []byte) error {
    return c.client.Put(key, value)
 }
+
+func (c *ConsulClient) CreateDir(key string) error {
+   return c.client.Put(key, []byte(""))
+}

@@ -1,31 +1,25 @@
 package client
 
-import (
-   "fmt"
-)
-
 type Client interface {
    Get(key string) ([]byte, error)
    Set(key string, value []byte) error
+   CreateDir(key string) error
 }
 
-func MakeClient(client_type string, server_host string) Client {
+func MakeClient(client_type string, server_host string, debug bool) Client {
    switch client_type {
    case "consul":
       return MakeConsulClient(server_host)
       break
    case "etcd":
       return MakeEtcdClient(server_host)
-      // if server_host == "" {
-      //   server_host = "localhost:2379"
-      // }
-      // client.base_url = fmt.Sprintf("http://%s/v2/keys", server_host)
-      fmt.Printf("etcd not implemented")
-      return nil
       break
    case "zookeeper":
-      fmt.Printf("zookeeper not implemented")
-      return nil
+      client, err := MakeZookeeperClient(server_host, debug)
+      if err != nil {
+         return nil   
+      }
+      return client
       break
    }
 
