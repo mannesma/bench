@@ -22,9 +22,6 @@ func main() {
       }
    } else {
       s.Run()
-      for k, v := range s.PerfList {
-         fmt.Printf("bench = %s\n", k)
-         v.Print(false)
-      }
+		s.PrintResults()
    }
 }

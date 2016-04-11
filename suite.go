@@ -1,10 +1,12 @@
 package bench
 
 import (
+	"encoding/json"
    "fmt"
    "github.com/mannesma/bench/client"
    "github.com/mannesma/bench/perf"
    "math/rand"
+	"os"
    "time"
 )
 
@@ -28,7 +30,9 @@ func MakeSuite (config *Config) *Suite {
    }
 
    if s.Config.BenchType == "read" {
-      fmt.Printf("Info: read test\n")
+		if s.Config.Debug {
+      	fmt.Printf("Info: read test\n")
+		}
       s.Benchmark = s.bench_read
       s.Setup = s.setup_read
       s.PerfList["Read"] = perf.MakeEvent("Read")
@@ -46,6 +50,34 @@ func (s *Suite) Run() {
       time.Sleep(sleepval)
       s.Benchmark()
    }
+}
+
+func (s *Suite) PrintResults() {
+	var result struct {
+		Config *Config          `json:Config`
+		PerfList []*perf.Report `json:PerfList`
+	}
+
+	result.Config = s.Config
+	// result.PerfList = make([]*perf.Report)
+	for k, v := range s.PerfList {
+		r := perf.MakeReport(v)
+		if s.Config.Debug {
+ 			fmt.Printf("bench = %s\n", k)
+ 			r.Print()
+ 		} else {
+			result.PerfList = append(result.PerfList, r)
+		}
+	}
+
+	if ! s.Config.Debug {
+		str, err := json.Marshal(result)
+		if err != nil {
+			fmt.Printf("Error: Failed to convert result to json: %s\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("%s\n", str)
+	}
 }
 
 func (s *Suite) calc_sleep_time() time.Duration {

@@ -55,38 +55,57 @@ func (pe *Event) Stop() error {
 	return nil
 }
 
-func (pe *Event) Print(debug bool) {
-	var avg_resp float64 = -1.0
-	var bench_time time.Duration = time.Duration(0)
-	var trans_rate float64 = -1.0
-
-	if pe.event_count != 0 {
-		avg_resp = float64(pe.total_duration) / float64(pe.event_count) /
-			float64(time.Millisecond)
-	}
-	if !pe.first_start_time.Equal(ZeroTime) && !pe.end_time.Equal(ZeroTime) {
-		bench_time = pe.end_time.Sub(pe.first_start_time)
-	}
-	if pe.event_count != 0 && bench_time != time.Duration(0) {
-		trans_rate = float64(pe.event_count) / bench_time.Seconds()
-	}
-
-	fmt.Printf("%10s,%10s,%12s,%15s,%12s,%15s\n",
-		"name", "e_cnt_t", "e_time_t(s)", "e_avg_rt(ms/e)",
-		"b_time_t(s)", "eff_rate(e/s)")
-	fmt.Printf("%10s,%10d,%12.6f,%15.6f,%12.6f,%15.6f\n",
-		pe.name, pe.event_count, pe.total_duration.Seconds(),
-		avg_resp, bench_time.Seconds(), trans_rate)
-
-	if debug {
-		fmt.Printf("   s: %v, e: %v, d: %v\n", pe.start_time, pe.end_time, pe.event_duration)
-	}
-}
-
 func (pe *Event) Clear() {
 	pe.start_time = time.Unix(0, 0)
 	pe.end_time = time.Unix(0, 0)
 	pe.event_duration = time.Duration(0)
 	pe.total_duration = time.Duration(0)
 	pe.event_count = 0
+}
+
+type Report struct {
+	Name string              `json:Name`
+	Total_Executions int64 `json:Total_Executions`
+	Total_Exec_Time float64  `json:Total_Exec_Time`
+	Avg_Resp_Time float64    `json:Avg_Resp_Time`
+	Total_Bench_Time float64 `json:Total_BenchTime`
+	Eff_Trans_Rate float64   `json:Eff_Trans_Rate`
+}
+
+func MakeReport(event *Event) *Report {
+	var avg_resp float64 = -1.0
+	var bench_time time.Duration = time.Duration(0)
+	var trans_rate float64 = -1.0
+
+
+	if event.event_count != 0 {
+		avg_resp = float64(event.total_duration) / float64(event.event_count) /
+			float64(time.Millisecond)
+	}
+	if !event.first_start_time.Equal(ZeroTime) && !event.end_time.Equal(ZeroTime) {
+		bench_time = event.end_time.Sub(event.first_start_time)
+	}
+	if event.event_count != 0 && bench_time != time.Duration(0) {
+		trans_rate = float64(event.event_count) / bench_time.Seconds()
+	}
+
+	r := &Report {
+		Name: event.name,
+		Total_Executions: event.event_count,
+		Total_Exec_Time: event.total_duration.Seconds(),
+		Avg_Resp_Time: avg_resp,
+		Total_Bench_Time: bench_time.Seconds(),
+		Eff_Trans_Rate: trans_rate,
+	}
+
+	return r
+}
+
+func (r *Report) Print() {
+	fmt.Printf("%10s,%10s,%12s,%15s,%12s,%15s\n",
+		"name", "e_cnt_t", "e_time_t(s)", "e_avg_rt(ms/e)",
+		"b_time_t(s)", "eff_rate(e/s)")
+	fmt.Printf("%10s,%10d,%12.6f,%15.6f,%12.6f,%15.6f\n",
+		r.Name, r.Total_Executions, r.Total_Exec_Time,
+		r.Avg_Resp_Time, r.Total_Bench_Time, r.Eff_Trans_Rate)
 }

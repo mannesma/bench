@@ -36,14 +36,16 @@ func MakeConfigFromCmdline() *Config {
       tc.ClientType != "zookeeper" {
       fmt.Printf("Error: invalid client_type '%s'\n", tc.ClientType)
    }
-   fmt.Printf("server_type = %s\n", tc.ClientType)
-   fmt.Printf("server_host = %s\n", tc.ServerHost)
-   fmt.Printf("setup = %t\n", tc.Setup)
-   fmt.Printf("bench_type = %s\n", tc.BenchType)
-   fmt.Printf("iterations = %d\n", tc.Iterations)
-   fmt.Printf("arrival_rate = %f\n", tc.ArrivalRate)
-   fmt.Printf("seed = %d\n", tc.Seed)
-   fmt.Printf("debug = %t\n", tc.Debug)
+   if tc.Debug {
+   	fmt.Printf("server_type = %s\n", tc.ClientType)
+   	fmt.Printf("server_host = %s\n", tc.ServerHost)
+   	fmt.Printf("setup = %t\n", tc.Setup)
+   	fmt.Printf("bench_type = %s\n", tc.BenchType)
+   	fmt.Printf("iterations = %d\n", tc.Iterations)
+   	fmt.Printf("arrival_rate = %f\n", tc.ArrivalRate)
+   	fmt.Printf("seed = %d\n", tc.Seed)
+   	fmt.Printf("debug = %t\n", tc.Debug)
+   }
 
    return tc
 }
