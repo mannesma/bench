@@ -29,6 +29,10 @@ func MakeSuite (config *Config) *Suite {
       PerfList: make(map[string]*perf.Event),
    }
 
+	if s.Client == nil {
+		return nil
+	}
+
    if s.Config.BenchType == "read" {
 		if s.Config.Debug {
       	fmt.Printf("Info: read test\n")
